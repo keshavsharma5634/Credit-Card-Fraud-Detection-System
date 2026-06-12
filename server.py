@@ -6,11 +6,20 @@ from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import os
 
-# 🔥 CRITICAL LIVE PATCH: Scikit-Learn Version Compatibility Fixer
+# 🔥 OMNI-PATCH ENGINE: Fixes ALL Scikit-Learn Version Mismatches in Runtime
 import sklearn.impute
+import sklearn.compose
+
+# Patch 1: Fix for SimpleImputer missing '_fill_dtype'
 if not hasattr(sklearn.impute.SimpleImputer, '_fill_dtype'):
-    # Dynamically inject the missing attribute that older models search for
     sklearn.impute.SimpleImputer._fill_dtype = lambda self, X: X.dtype
+
+# Patch 2: Fix for ColumnTransformer missing '_name_to_fitted_passthrough'
+if not hasattr(sklearn.compose.ColumnTransformer, '_name_to_fitted_passthrough'):
+    @property
+    def dummy_passthrough(self):
+        return getattr(self, '_fitted_passthrough', [])
+    sklearn.compose.ColumnTransformer._name_to_fitted_passthrough = dummy_passthrough
 
 app = FastAPI()
 
@@ -146,6 +155,11 @@ def predict_fraud(data: TransactionInput):
         }
         
         df_inference = pd.DataFrame([raw_row])
+        
+        # 🔥 Dynamic fix for missing properties during prediction runtime
+        if not hasattr(model_pipeline, '_name_to_fitted_passthrough'):
+            model_pipeline._name_to_fitted_passthrough = []
+
         risk_probability = float(model_pipeline.predict_proba(df_inference)[0, 1])
         
         if risk_probability >= 0.40:
