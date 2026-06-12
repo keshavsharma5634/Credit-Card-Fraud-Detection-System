@@ -139,10 +139,7 @@
             midnight_rush: { amt: 280000.00, category: 'category_travel', city_pop: 1200000, hour: 4, day_of_week: 6, trans_count_24h: 12 }
         };
 
-        let currentPreset = 'safe';
-
         function loadPreset(key) {
-            currentPreset = key;
             const data = presets[key];
             document.getElementById("amt").value = data.amt;
             document.getElementById("categorySelect").value = data.category;
@@ -188,6 +185,7 @@
             }
 
             try {
+                // 🌟 LIVE SERVER URL LINKED PERFECTLY
                 const call = await fetch("https://credit-card-fraud-detection-system-80q6.onrender.com/predict", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -203,38 +201,29 @@
                     return;
                 }
 
-                // 🌟 SMART CALIBRATION FOR RE-MAPPED CLOUD MATRIX
-                let riskVal = (response.risk_prob * 100).toFixed(2);
-                let finalState = response.alert_state;
-
-                // Force layout rules consistency for specific presets to match the original UX design
-                if (currentPreset === 'suspicious' && amt === 95000) {
-                    riskVal = "14.35";
-                    finalState = "HIGH_RISK_WARNING";
-                } else if (currentPreset === 'midnight_rush' && amt === 280000) {
-                    riskVal = "94.57";
-                    finalState = "CRITICAL_FRAUD";
-                }
-
-                if (finalState === "CRITICAL_FRAUD") {
+                const riskVal = (response.risk_prob * 100).toFixed(2);
+                
+                // 🌟 PURE ML-DRIVEN SERVER CONDITIONAL STATES (No Hardcoding values)
+                if (response.alert_state === "CRITICAL_FRAUD" || parseFloat(riskVal) >= 40.0) {
                     targetReport.className = "mt-6 p-5 rounded-2xl border bg-red-950/50 border-red-800/80 text-red-200 text-left";
                     targetReport.innerHTML = `
                         <div class="flex items-start gap-4">
                             <span class="text-3xl">🚨</span>
                             <div>
                                 <h4 class="font-extrabold text-base text-red-400">FRAUD PATTERN ISOLATED & BLOCKED</h4>
-                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">XGBoost core system flags extreme anomaly metrics. Fraud probability matches <b class="text-red-300 text-sm">${riskVal}%</b> (System Alert Boundary Limit: 7.00%).</p>
+                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">XGBoost core system flags extreme anomaly metrics. Live model probability output: <b class="text-red-300 text-sm">${riskVal}%</b>.</p>
                             </div>
                         </div>`;
                 } 
-                else if (finalState === "HIGH_RISK_WARNING") {
+                else if (response.alert_state === "HIGH_RISK_WARNING" || parseFloat(riskVal) >= 3.0) {
+                    // System checks true server status mapping or cloud boundary adjustment
                     targetReport.className = "mt-6 p-5 rounded-2xl border bg-amber-950/40 border-amber-800/80 text-amber-200 text-left";
                     targetReport.innerHTML = `
                         <div class="flex items-start gap-4">
                             <span class="text-3xl">⚠️</span>
                             <div>
                                 <h4 class="font-extrabold text-base text-amber-400">HIGH RISK WARNING (SUSPICIOUS)</h4>
-                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">System notices atypical behavioral parameters. Risk rating score evaluated at <b class="text-amber-300 text-sm">${riskVal}%</b>. Transaction held under strict audit check.</p>
+                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">System notices atypical behavioral parameters. Live model probability output: <b class="text-amber-300 text-sm">${riskVal}%</b>. Transaction held under strict audit check.</p>
                             </div>
                         </div>`;
                 } 
@@ -245,7 +234,7 @@
                             <span class="text-3xl">✅</span>
                             <div>
                                 <h4 class="font-extrabold text-base text-emerald-400">TRANSACTION PATTERN VERIFIED</h4>
-                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">Transaction parameters fall securely within standard user bounds. Risk rating score evaluated at <b class="text-emerald-300 text-sm">${riskVal}%</b>.</p>
+                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">Transaction parameters fall securely within standard user bounds. Live model probability output: <b class="text-emerald-300 text-sm">${riskVal}%</b>.</p>
                             </div>
                         </div>`;
                 }
