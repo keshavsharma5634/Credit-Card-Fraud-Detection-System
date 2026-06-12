@@ -3,5 +3,5 @@ uvicorn
 joblib
 pandas
 numpy
-scikit-learn==1.3.2
+scikit-learn
 xgboost
