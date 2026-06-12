@@ -6,6 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import os
 
+# 🔥 CRITICAL LIVE PATCH: Scikit-Learn Version Compatibility Fixer
+import sklearn.impute
+if not hasattr(sklearn.impute.SimpleImputer, '_fill_dtype'):
+    # Dynamically inject the missing attribute that older models search for
+    sklearn.impute.SimpleImputer._fill_dtype = lambda self, X: X.dtype
+
 app = FastAPI()
 
 # ✅ Enable CORS for UI Connection
@@ -18,12 +24,10 @@ app.add_middleware(
 )
 
 model_pipeline = None
-default_threshold = 0.07  # Notebook 04 T_STAR value
+default_threshold = 0.07
 
-# 🔥 BULLETPROOF PATH FINDER ENGINE FOR DEPLOYMENT SERVER
 try:
     path = None
-    # Hardcoded potential structural targets on cluster drives
     possible_paths = [
         "models/fraud_xgb.joblib", 
         "../models/fraud_xgb.joblib", 
@@ -44,7 +48,6 @@ try:
             model_pipeline = bundle
         print(f"✅ SUCCESS: Complete ColumnTransformer Pipeline Loaded perfectly from '{path}'!")
     else:
-        # Fallback automatic structural lookup
         print("⚠️ Direct paths failed. Running deep scan engine on root layout...")
         found = False
         for root, dirs, files in os.walk("."):
@@ -93,8 +96,6 @@ def predict_fraud(data: TransactionInput):
         
     try:
         input_dict = data.model_dump()
-        
-        # INDIAN RUPEE TO DOLLAR SCALER
         inr_amount = float(input_dict['amt'])
         scaled_usd_amount = inr_amount / 85.0
         
@@ -124,14 +125,12 @@ def predict_fraud(data: TransactionInput):
             'month': int(input_dict['month']),
             'prev_24h_tx_count_card': int(input_dict['trans_count_24h']),
             'category': str(resolved_category),
-            
             'merchant_cat': str(resolved_category),
             'merchant_cat_rare': 0,
             'country': 'US',
             'dayofweek': int(input_dict['day_of_week']),
             'city': 'unknown',
             'device_type': 'mobile',
-            
             'log_amount': np.log1p(scaled_usd_amount),
             'velocity_ratio': 1.0,
             'avg_tx_amt_24h': scaled_usd_amount,
