@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Credit Card Fraud Detection Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 🌌 Custom Dark Cyberpunk Background Theme */
+        .cyber-bg {
+            background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+        }
+        /* 🧊 Glassmorphism Cards Layout */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        /* 🔥 Neon Glow Effects for Inputs */
+        .neon-input {
+            background: rgba(15, 23, 42, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .neon-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+        /* Hide spin buttons for Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Hide spin buttons for Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="cyber-bg text-slate-100 min-h-screen font-sans">
+
+    <nav class="bg-slate-900/80 border-b border-slate-800 px-8 py-4 flex justify-between items-center shadow-lg backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl">🛡️</span>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
+                    FRAUD-SHIELD AI
+                </h1>
+                
+            </div>
+        </div>
+        <div class="bg-slate-800 px-4 py-2 rounded-xl border border-slate-700 text-xs font-mono flex items-center space-x-2">
+            <span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+            <span class="text-slate-300">FastAPI: Active Node</span>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto p-6 space-y-6 mt-4">
+        
+        <div class="glass-card p-5 rounded-2xl shadow-xl">
+            <h3 class="text-xs font-bold text-blue-400 mb-3 uppercase tracking-wider font-mono">
+                ⚡ Instant Simulation Presets
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button type="button" onclick="loadPreset('safe')" class="bg-emerald-950/30 border border-emerald-800/40 hover:bg-emerald-900/40 text-emerald-400 p-4 rounded-xl text-left transition duration-200">
+                    <div class="font-bold text-sm">✅ Standard Grocery Run</div>
+                    <div class="text-xs text-emerald-500/70 mt-1">₹3,500.00 - Safe Swipe</div>
+                </button>
+                <button type="button" onclick="loadPreset('suspicious')" class="bg-amber-950/30 border border-amber-800/40 hover:bg-amber-900/40 text-amber-400 p-4 rounded-xl text-left transition duration-200">
+                    <div class="font-bold text-sm">⚠️ Electronics Order</div>
+                    <div class="text-xs text-amber-500/70 mt-1">₹95,000.00 - High Risk Time</div>
+                </button>
+                <button type="button" onclick="loadPreset('midnight_rush')" class="bg-rose-950/30 border border-rose-800/40 hover:bg-rose-900/40 text-rose-400 p-4 rounded-xl text-left transition duration-200">
+                    <div class="font-bold text-sm">🚨 Instant Card Drain</div>
+                    <div class="text-xs text-rose-500/70 mt-1">₹2,80,000.00 - Attack Pattern</div>
+                </button>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl shadow-2xl">
+            <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
+                🖥️ Feature Vector Matrix Input
+            </h2>
+            <form id="fraudForm" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                
+                <div class="col-span-2">
+                    <label class="block text-xs text-slate-400 mb-1.5 font-medium">Transaction Amount (₹)</label>
+                    <input type="number" step="0.01" id="amt" required class="w-full neon-input rounded-xl p-3 text-white font-mono text-base">
+                </div>
+                
+                <div class="col-span-2">
+                    <label class="block text-xs text-slate-400 mb-1.5 font-medium">Merchant Category</label>
+                    <select id="categorySelect" class="w-full bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 focus:outline-none focus:border-blue-500 text-base">
+                        <option value="category_grocery_pos">Grocery Store (POS)</option>
+                        <option value="category_shopping_net">Online Shopping (Net)</option>
+                        <option value="category_gas_transport">Gas & Transport</option>
+                        <option value="category_food_dining">Food & Dining</option>
+                        <option value="category_travel">Travel / Flights</option>
+                        <option value="category_entertainment">Entertainment</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1.5 font-medium">City Population</label>
+                    <input type="number" id="city_pop" class="w-full neon-input rounded-xl p-2.5 text-white font-mono text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1.5 font-medium">Txn Hour (0-23)</label>
+                    <input type="number" id="hour" min="0" max="23" class="w-full neon-input rounded-xl p-2.5 text-white font-mono text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1.5 font-medium">Day of Week (0-6)</label>
+                    <input type="number" id="day_of_week" min="0" max="6" class="w-full neon-input rounded-xl p-2.5 text-white font-mono text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1.5 font-medium">24h Txn Count</label>
+                    <input type="number" id="trans_count_24h" class="w-full neon-input rounded-xl p-2.5 text-white font-mono text-sm">
+                </div>
+
+                <input type="hidden" id="is_male" value="1">
+                <input type="hidden" id="age" value="34">
+                <input type="hidden" id="month" value="6">
+
+                <div class="col-span-2 md:col-span-4 mt-3">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl tracking-wider transition duration-150 active:scale-[0.99] shadow-lg shadow-blue-900/30 text-base">
+                        Analyze Risk via XGBoost Model ⚡
+                    </button>
+                </div>
+            </form>
+
+            <div id="statusReport" class="mt-6 p-5 rounded-2xl border hidden transition duration-300"></div>
+        </div>
+    </div>
+
+    <script>
+        // Indian Currency Scenarios Data Map
+        const presets = {
+            safe: { amt: 3500.00, category: 'category_grocery_pos', city_pop: 45000, hour: 13, day_of_week: 2, trans_count_24h: 1 },
+            suspicious: { amt: 95000.00, category: 'category_shopping_net', city_pop: 850000, hour: 2, day_of_week: 5, trans_count_24h: 4 },
+            midnight_rush: { amt: 280000.00, category: 'category_travel', city_pop: 1200000, hour: 4, day_of_week: 6, trans_count_24h: 12 }
+        };
+
+        function loadPreset(key) {
+            const data = presets[key];
+            document.getElementById("amt").value = data.amt;
+            document.getElementById("categorySelect").value = data.category;
+            document.getElementById("city_pop").value = data.city_pop;
+            document.getElementById("hour").value = data.hour;
+            document.getElementById("day_of_week").value = data.day_of_week;
+            document.getElementById("trans_count_24h").value = data.trans_count_24h;
+            
+            // Clean previous status on preset change
+            document.getElementById("statusReport").classList.add("hidden");
+        }
+
+        // Initialize setup with safe telemetry
+        loadPreset('safe');
+
+        document.getElementById("fraudForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const targetReport = document.getElementById("statusReport");
+            targetReport.className = "mt-6 p-5 rounded-xl border bg-slate-900 border-slate-800 text-center text-slate-300 animate-pulse font-mono text-xs";
+            targetReport.innerHTML = "Computing weights vector layers through active cloud engine...";
+            targetReport.classList.remove("hidden");
+
+            const amt = parseFloat(document.getElementById("amt").value);
+            const chosenCategory = document.getElementById("categorySelect").value;
+            
+            const payload = {
+                amt: amt,
+                city_pop: parseInt(document.getElementById("city_pop").value),
+                is_male: parseInt(document.getElementById("is_male").value),
+                age: parseInt(document.getElementById("age").value),
+                hour: parseInt(document.getElementById("hour").value),
+                day_of_week: parseInt(document.getElementById("day_of_week").value),
+                month: parseInt(document.getElementById("month").value),
+                trans_count_24h: parseInt(document.getElementById("trans_count_24h").value),
+                
+                category_entertainment: 0, category_food_dining: 0, category_gas_transport: 0,
+                category_grocery_net: 0, category_grocery_pos: 0, category_health_fitness: 0,
+                category_home: 0, category_kids_pets: 0, category_misc_net: 0, category_misc_pos: 0,
+                category_personal_care: 0, category_shopping_net: 0, category_shopping_pos: 0, category_travel: 0
+            };
+
+            if (payload.hasOwnProperty(chosenCategory)) {
+                payload[chosenCategory] = 1;
+            }
+
+            try {
+                const call = await fetch("http://127.0.0.1:8000/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                const response = await call.json();
+                targetReport.classList.remove("animate-pulse");
+
+                if(response.status === "Error") {
+                    targetReport.className = "mt-6 p-5 rounded-2xl border bg-rose-950/20 border-rose-900/50 text-rose-300 text-left";
+                    targetReport.innerHTML = `❌ <b>Runtime System Exception:</b> ${response.error}`;
+                    return;
+                }
+
+                const riskVal = (response.risk_prob * 100).toFixed(2);
+                const thresholdVal = (response.threshold_used * 100).toFixed(2);
+                
+                // 🔥 TRUE 3-STATE INTERFACE LOGIC
+                // State 1: Extreme Fraud Pattern (>40% Risk Score) -> Red Critical Alert
+                if (parseFloat(riskVal) >= 40.0) {
+                    targetReport.className = "mt-6 p-5 rounded-2xl border bg-red-950/50 border-red-800/80 text-red-200 text-left";
+                    targetReport.innerHTML = `
+                        <div class="flex items-start gap-4">
+                            <span class="text-3xl">🚨</span>
+                            <div>
+                                <h4 class="font-extrabold text-base text-red-400">FRAUD PATTERN ISOLATED & BLOCKED</h4>
+                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">XGBoost core system flags extreme anomaly metrics. Fraud probability matches <b class="text-red-300 text-sm">${riskVal}%</b> (System Alert Boundary Limit: ${thresholdVal}%).</p>
+                            </div>
+                        </div>`;
+                } 
+                // State 2: Suspicious / High Risk Warning (>7% and <40%) -> Amber/Yellow Alert
+                else if (parseFloat(riskVal) >= parseFloat(thresholdVal)) {
+                    targetReport.className = "mt-6 p-5 rounded-2xl border bg-amber-950/40 border-amber-800/80 text-amber-200 text-left";
+                    targetReport.innerHTML = `
+                        <div class="flex items-start gap-4">
+                            <span class="text-3xl">⚠️</span>
+                            <div>
+                                <h4 class="font-extrabold text-base text-amber-400">HIGH RISK WARNING (SUSPICIOUS)</h4>
+                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">System notices atypical behavioral parameters. Risk rating score evaluated at <b class="text-amber-300 text-sm">${riskVal}%</b>. Transaction held under strict audit check.</p>
+                            </div>
+                        </div>`;
+                } 
+                // State 3: Secure Verified Transaction (<7%) -> Green Secure Alert
+                else {
+                    targetReport.className = "mt-6 p-5 rounded-2xl border bg-emerald-950/50 border-emerald-800/80 text-emerald-200 text-left";
+                    targetReport.innerHTML = `
+                        <div class="flex items-start gap-4">
+                            <span class="text-3xl">✅</span>
+                            <div>
+                                <h4 class="font-extrabold text-base text-emerald-400">TRANSACTION PATTERN VERIFIED</h4>
+                                <p class="text-xs mt-1 text-slate-300 leading-relaxed">Transaction parameters fall securely within standard user bounds. Risk rating score evaluated at <b class="text-emerald-300 text-sm">${riskVal}%</b>.</p>
+                            </div>
+                        </div>`;
+                }
+
+            } catch (err) {
+                targetReport.classList.remove("animate-pulse");
+                targetReport.className = "mt-6 p-5 rounded-2xl border bg-amber-950/30 border-amber-900/60 text-amber-300 text-center text-xs font-mono";
+                targetReport.innerHTML = "⚠️ API Connection Timeout. Please make sure your FastAPI server.py is alive on Port 8000.";
+            }
+        });
+    </script>
+</body>
+</html>
