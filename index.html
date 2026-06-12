@@ -190,7 +190,7 @@
             }
 
             try {
-                const call = await fetch("http://127.0.0.1:8000/predict", {
+                const call = await fetch("https://credit-card-fraud-detection-system-80q6.onrender.com/predict", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload)
