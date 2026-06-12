@@ -18,12 +18,18 @@ app.add_middleware(
 )
 
 model_pipeline = None
-default_threshold = 0.07  # Default threshold from your notebook 04 tuning
+default_threshold = 0.07  # Notebook 04 T_STAR value
 
-# 🔥 LOAD THE PIPELINE BUNDLE FROM YOUR MODELS FOLDER
+# 🔥 BULLETPROOF PATH FINDER ENGINE FOR DEPLOYMENT SERVER
 try:
     path = None
-    possible_paths = ["models/fraud_xgb.joblib", "../models/fraud_xgb.joblib", "fraud_xgb.joblib"]
+    # Hardcoded potential structural targets on cluster drives
+    possible_paths = [
+        "models/fraud_xgb.joblib", 
+        "../models/fraud_xgb.joblib", 
+        "fraud_xgb.joblib",
+        "/opt/render/project/src/models/fraud_xgb.joblib"
+    ]
     for p in possible_paths:
         if os.path.exists(p):
             path = p
@@ -36,14 +42,26 @@ try:
             default_threshold = bundle.get("threshold", 0.07)
         else:
             model_pipeline = bundle
-        print(f"✅ SUCCESS: Complete ColumnTransformer Pipeline Loaded from '{path}'!")
-        print(f"🎯 Threshold Configured: {default_threshold}")
+        print(f"✅ SUCCESS: Complete ColumnTransformer Pipeline Loaded perfectly from '{path}'!")
     else:
-        print("❌ ERROR: fraud_xgb.joblib file not found anywhere!")
+        # Fallback automatic structural lookup
+        print("⚠️ Direct paths failed. Running deep scan engine on root layout...")
+        found = False
+        for root, dirs, files in os.walk("."):
+            if "fraud_xgb.joblib" in files:
+                target_path = os.path.join(root, "fraud_xgb.joblib")
+                bundle = joblib.load(target_path)
+                model_pipeline = bundle.get("model") if isinstance(bundle, dict) else bundle
+                default_threshold = bundle.get("threshold", 0.07) if isinstance(bundle, dict) else 0.07
+                print(f"✅ SUCCESS: Deep scan found and loaded model from: '{target_path}'")
+                found = True
+                break
+        if not found:
+            print("❌ CRITICAL ERROR: fraud_xgb.joblib file could not be discovered on system node.")
+            
 except Exception as e:
     print(f"❌ ERROR During Loading: {e}")
 
-# Frontend Payload Schema
 class TransactionInput(BaseModel):
     amt: float
     city_pop: int
@@ -76,7 +94,10 @@ def predict_fraud(data: TransactionInput):
     try:
         input_dict = data.model_dump()
         
-        # 🔍 Mapping category flags back to the original categorical string
+        # INDIAN RUPEE TO DOLLAR SCALER
+        inr_amount = float(input_dict['amt'])
+        scaled_usd_amount = inr_amount / 85.0
+        
         category_mapping = {
             'category_entertainment': 'entertainment', 'category_food_dining': 'food_dining',
             'category_gas_transport': 'gas_transport', 'category_grocery_net': 'grocery_net',
@@ -93,9 +114,8 @@ def predict_fraud(data: TransactionInput):
                 resolved_category = text_val
                 break
 
-        # 🎯 Reconstructing the exact dataset structure including the missing transformer tokens
         raw_row = {
-            'amount': float(input_dict['amt']),
+            'amount': scaled_usd_amount,
             'city_pop': int(input_dict['city_pop']),
             'is_male': int(input_dict['is_male']),
             'age': int(input_dict['age']),
@@ -105,7 +125,6 @@ def predict_fraud(data: TransactionInput):
             'prev_24h_tx_count_card': int(input_dict['trans_count_24h']),
             'category': str(resolved_category),
             
-            # 🔥 FIX: Adding the 6 strictly demanded columns by your ColumnTransformer Pipeline
             'merchant_cat': str(resolved_category),
             'merchant_cat_rare': 0,
             'country': 'US',
@@ -113,13 +132,12 @@ def predict_fraud(data: TransactionInput):
             'city': 'unknown',
             'device_type': 'mobile',
             
-            # Dynamic dynamic features mirroring your training notebooks calculations
-            'log_amount': np.log1p(float(input_dict['amt'])),
+            'log_amount': np.log1p(scaled_usd_amount),
             'velocity_ratio': 1.0,
-            'avg_tx_amt_24h': float(input_dict['amt']),
+            'avg_tx_amt_24h': scaled_usd_amount,
             'amount_vs_24h_zscore': 0.0,
             'prev_1h_tx_count_card': 0.0,
-            'prev_24h_amt_card': float(input_dict['amt']),
+            'prev_24h_amt_card': scaled_usd_amount,
             'velocity_amt_1h': 0.0,
             'is_international': 0,
             'is_night': 1 if int(input_dict['hour']) < 6 or int(input_dict['hour']) > 22 else 0,
@@ -128,23 +146,25 @@ def predict_fraud(data: TransactionInput):
             'channel': 'mobile'
         }
         
-        # Build clean dataframe matching pipeline training features
         df_inference = pd.DataFrame([raw_row])
-        
-        # Run final inference score safely
         risk_probability = float(model_pipeline.predict_proba(df_inference)[0, 1])
-        is_fraudulent = bool(risk_probability >= default_threshold)
+        
+        if risk_probability >= 0.40:
+            alert_state = "CRITICAL_FRAUD"
+        elif risk_probability >= default_threshold:
+            alert_state = "HIGH_RISK_WARNING"
+        else:
+            alert_state = "SAFE"
 
         return {
             "status": "Success",
             "risk_prob": risk_probability,
-            "is_fraud": is_fraudulent,
+            "alert_state": alert_state,
             "threshold_used": default_threshold
         }
         
     except Exception as e:
-        print("API Execution Warning Exception:", str(e))
-        return {"status": "Error", "error": f"ColumnTransformer Inference Block Failure: {str(e)}"}
+        return {"status": "Error", "error": f"Inference Block Failure: {str(e)}"}
 
 if __name__ == "__main__":
     import uvicorn
